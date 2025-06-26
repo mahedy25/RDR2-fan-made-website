@@ -3,27 +3,27 @@ const people = [
   {
     id: 1,
     name: 'Arthur Morgan',
-    image: '/characters/arthur.png',
+    image: '/characters/arthur-nav.jpg',
   },
   {
     id: 2,
     name: 'Dutch van der Linde',
-    image: '/characters/dutch.jpg',
+    image: '/characters/dutch-nav.jpg',
   },
   {
     id: 3,
     name: 'John Marston',
-    image: '/characters/john.jpg',
+    image: '/characters/john-nav.jpg',
   },
   {
     id: 4,
     name: 'Sadie Adler',
-    image: '/characters/sadie.jpg',
+    image: '/characters/sadie-nav.jpg',
   },
   {
     id: 5,
     name: 'Micah Bell',
-    image: '/characters/micah.jpg',
+    image: '/characters/micah-nav.jpg',
   },
 ]
 

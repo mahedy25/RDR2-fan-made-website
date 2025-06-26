@@ -10,6 +10,8 @@ gsap.registerPlugin(useGSAP)
 
 export default function Navbar() {
   const imageRef = useRef<HTMLImageElement>(null)
+  const defaultImageRef = useRef<HTMLImageElement>(null)
+
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'people' | 'places' | null>(
     'people'
@@ -65,31 +67,39 @@ export default function Navbar() {
   }, [isOpen])
 
   useGSAP(
-  () => {
-    if (!imageRef.current) return
+    () => {
+      if (!defaultImageRef.current) return
 
-    if (hovered) {
-      gsap.killTweensOf(imageRef.current)
-
-      gsap.fromTo(
-        imageRef.current,
-        { x: 0 },
-        {
-          x: -30,
-          duration: 45,
-          ease: 'power2.inout',
-        }
-      )
-    } else {
-      gsap.to(imageRef.current, {
-        x: 0,
-        duration: 1,
+      // Fade default image in or out
+      gsap.to(defaultImageRef.current, {
+        opacity: hovered ? 0 : 1,
+        duration: 0.2,
         ease: 'power2.inOut',
       })
-    }
-  },
-  { dependencies: [hovered] } // This replaces the useEffect dependency array
-)
+
+      // Slide hovered image (only if there's one)
+      if (hovered && imageRef.current) {
+        gsap.killTweensOf(imageRef.current)
+        gsap.fromTo(
+          imageRef.current,
+          { x: 0 },
+          {
+            x: -30,
+            duration: 8,
+            ease: 'power2.inOut',
+          }
+        )
+      } else if (imageRef.current) {
+        gsap.to(imageRef.current, {
+          x: 0,
+          duration: 1,
+          ease: 'power2.inOut',
+        })
+      }
+    },
+    
+    { dependencies: [hovered] }
+  )
 
   const data =
     activeTab === 'people' ? people : activeTab === 'places' ? places : []
@@ -135,14 +145,28 @@ export default function Navbar() {
           className='flex-1 bg-black flex items-center justify-center relative'
         >
           <Image
-           ref={imageRef}
-            src={hovered?.image || '/images/navbar-side-img.jpg'}
-            alt={hovered?.name || 'Background'}
+            ref={defaultImageRef}
+            src='/images/navbar-side-img.jpg'
+            alt='Background'
             fill
             sizes='(max-width: 768px) 100vw, 50vw'
-            style={{ objectFit: 'contain', }}
+            style={{ objectFit: 'contain' }}
+            className='absolute inset-0'
             priority
           />
+
+          {/* Hovered Image (animates on hover) */}
+          {hovered && (
+            <Image
+              ref={imageRef}
+              src={hovered.image}
+              alt={hovered.name}
+              fill
+              sizes='(max-width: 768px) 100vw, 50vw'
+              className='absolute inset-0 lg:object-contain object-cover '
+              priority
+            />
+          )}
         </div>
 
         <div
@@ -150,7 +174,7 @@ export default function Navbar() {
           className='flex-1 bg-[#0f172a] text-white flex flex-col p-10 justify-start '
         >
           {/* Top Nav */}
-          <div className='flex flex-row gap-10 lg:gap-20 xl:gap-16 text-lg md:text-xl  font-bold mt-20 '>
+          <div className='flex flex-row gap-10 lg:gap-20 xl:gap-16 text-lg md:text-xl  font-bold mt-15 '>
             <button
               className={`px-5 py-2 rounded-full transition-all duration-300 cursor-pointer ${
                 activeTab === 'people'
@@ -181,7 +205,7 @@ export default function Navbar() {
                   key={item.id}
                   onMouseEnter={() => setHovered(item)}
                   onMouseLeave={() => setHovered(null)}
-                  className='block text-left text-xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold hover:underline text-white cursor-pointer uppercase'
+                  className='block text-left text-xl md:text-4xl lg:text-5xl xl:text-6xl font-bold hover:text-red-500 text-white cursor-pointer uppercase'
                 >
                   {item.name}
                 </button>
