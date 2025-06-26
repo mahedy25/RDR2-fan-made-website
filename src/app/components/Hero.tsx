@@ -11,33 +11,31 @@ export default function Hero() {
   const frontRef = useRef(null)
   const containerRef = useRef(null)
 
-useGSAP(() => {
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: containerRef.current,
-      start: 'top top',
-      end: '+=300%',
-      scrub: true,
-      pin: true,
-    }
-  })
 
-  // First 20% of scroll: do nothing (dummy tween)
-  tl.to({}, { duration: 0.2 })
+  useGSAP(() => {
+    gsap.fromTo(frontRef.current,
+      { opacity: 0, scale: 1.5 },
+      {
+        opacity: 1,
+        scale: 1,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top top',
+          end: '+=300%',
+          scrub: 1.5,
+          pin: true, // 🔥 pin the section until animation completes
+        },
+      }
+    )
 
-  // Animate opacity and scale from 20% scroll onwards (remaining 80%)
-  tl.fromTo(frontRef.current,
-    { opacity: 0, scale: 2.5 },
-    { opacity: 1, scale: 1, ease: 'power2.out', duration: 0.8 },
-    "<"
-  )
-}, [])
+  }, [])
 
   return (
     <div
       id="hero"
       ref={containerRef}
-      className="relative w-full h-[400vh] overflow-x-hidden"
+      className="relative w-full h-[150vh] overflow-x-hidden"
     >
       {/* Sticky container for both images */}
       <div className="sticky top-0 w-full h-screen">
@@ -63,6 +61,11 @@ useGSAP(() => {
             fill
             className="object-contain md:object-cover object-center"
           />
+        </div>
+
+        {/* this text will fade in smoothly from the bottom to its position removing the need for a second image when scrolling */}
+        <div className='text-4xl text-white'>
+          <h1>The Goated Game</h1>
         </div>
       </div>
     </div>
