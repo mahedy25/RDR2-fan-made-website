@@ -9,13 +9,13 @@ import { people, places } from '../../..'
 gsap.registerPlugin(useGSAP)
 
 export default function Navbar() {
+  const [showFallbackText, setShowFallbackText] = useState(true)
+
+  const [imageSrc, setImageSrc] = useState<string | null>(null)
   const imageRef = useRef<HTMLImageElement>(null)
-  const defaultImageRef = useRef<HTMLImageElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'people' | 'places' | null>(
-    'people'
-  )
+  const [activeTab, setActiveTab] = useState<'people' | 'places'>('people')
   const [hovered, setHovered] = useState<{
     name: string
     image: string
@@ -68,41 +68,64 @@ export default function Navbar() {
 
   useGSAP(
     () => {
-      if (!defaultImageRef.current) return
+      if (!imageRef.current) return
 
-      // Fade default image in or out
-      gsap.to(defaultImageRef.current, {
-        opacity: hovered ? 0 : 1,
-        duration: 0.2,
-        ease: 'power2.inOut',
-      })
+      const imageEl = imageRef.current
 
-      // Slide hovered image (only if there's one)
-      if (hovered && imageRef.current) {
-        gsap.killTweensOf(imageRef.current)
+      if (hovered) {
+        // Change image before animating in
+        setImageSrc(hovered.image)
+
+        gsap.killTweensOf(imageEl)
+
         gsap.fromTo(
-          imageRef.current,
-          { x: 0 },
+          imageEl,
+          { opacity: 0, scale: 1.05, x: 0 },
           {
-            x: -30,
-            duration: 8,
-            ease: 'power2.inOut',
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            ease: 'power3.out',
           }
         )
-      } else if (imageRef.current) {
-        gsap.to(imageRef.current, {
+
+        gsap.to(imageEl, {
+          x: -40,
+          duration: 15,
+          ease: 'sine.inOut',
+        })
+      } else {
+        setShowFallbackText(false) // Hide text right away
+
+        gsap.killTweensOf(imageEl)
+
+        // Animate out image
+        gsap.to(imageEl, {
+          opacity: 0,
+          scale: 1.05,
+          duration: 0.6,
+          ease: 'power2.out',
+          onComplete: () => {
+            // Only show fallback text if still no hovered image after fade
+            requestAnimationFrame(() => {
+              if (!hovered) {
+                setShowFallbackText(true)
+              }
+            })
+          },
+        })
+
+        gsap.to(imageEl, {
           x: 0,
           duration: 1,
-          ease: 'power2.inOut',
+          ease: 'power2.out',
         })
       }
     },
-    
     { dependencies: [hovered] }
   )
 
-  const data =
-    activeTab === 'people' ? people : activeTab === 'places' ? places : []
+  const data = activeTab === 'people' ? people : places
 
   return (
     <>
@@ -140,46 +163,43 @@ export default function Navbar() {
         style={{ display: 'none' }}
         className='fixed inset-0 z-40 opacity-0 flex flex-row'
       >
+        {/* Left Side */}
         <div
           ref={leftRef}
-          className='flex-1 bg-black flex items-center justify-center relative'
+          className='flex-1 bg-black flex items-center justify-center relative overflow-hidden'
         >
+          {/* Hovered Image */}
           <Image
-            ref={defaultImageRef}
-            src='/images/navbar-side-img.jpg'
-            alt='Background'
+            ref={imageRef}
+            src={imageSrc || '/placeholder.png'} // Or some blank transparent image
+            alt={hovered?.name || 'placeholder'}
             fill
             sizes='(max-width: 768px) 100vw, 50vw'
-            style={{ objectFit: 'contain' }}
-            className='absolute inset-0'
+            className='absolute inset-0 lg:object-contain object-cover pointer-events-none z-10'
+            style={{ opacity: 0 }}
             priority
           />
 
-          {/* Hovered Image (animates on hover) */}
-          {hovered && (
-            <Image
-              ref={imageRef}
-              src={hovered.image}
-              alt={hovered.name}
-              fill
-              sizes='(max-width: 768px) 100vw, 50vw'
-              className='absolute inset-0 lg:object-contain object-cover '
-              priority
-            />
+          {/* RDR2 text with red color and blurry background */}
+          {showFallbackText && (
+            <div className='text-red-600 text-6xl md:text-7xl lg:text-8xl font-extrabold px-8 py-6 rounded-xl backdrop-blur-md z-0 transition-opacity duration-500 opacity-100'>
+              RDR2
+            </div>
           )}
         </div>
 
+        {/* Right Side */}
         <div
           ref={rightRef}
-          className='flex-1 bg-[#0f172a] text-white flex flex-col p-10 justify-start '
+          className='flex-1 bg-[#0f172a] text-white flex flex-col p-10 justify-start'
         >
-          {/* Top Nav */}
-          <div className='flex flex-row gap-10 lg:gap-20 xl:gap-16 text-lg md:text-xl  font-bold mt-15 '>
+          {/* Tabs */}
+          <div className='flex flex-row gap-10 lg:gap-20 xl:gap-16 text-lg md:text-xl font-bold mt-15'>
             <button
               className={`px-5 py-2 rounded-full transition-all duration-300 cursor-pointer ${
                 activeTab === 'people'
                   ? 'bg-white text-black'
-                  : 'bg-transparent text-white '
+                  : 'bg-transparent text-white'
               }`}
               onClick={() => setActiveTab('people')}
             >
@@ -189,7 +209,7 @@ export default function Navbar() {
               className={`px-5 py-2 rounded-full transition-all duration-300 cursor-pointer ${
                 activeTab === 'places'
                   ? 'bg-white text-black'
-                  : 'bg-transparent text-white  '
+                  : 'bg-transparent text-white'
               }`}
               onClick={() => setActiveTab('places')}
             >
@@ -197,21 +217,19 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* List of Names */}
-          {activeTab && (
-            <div className='mt-16 space-y-6 md:space-y-10'>
-              {data.map((item) => (
-                <button
-                  key={item.id}
-                  onMouseEnter={() => setHovered(item)}
-                  onMouseLeave={() => setHovered(null)}
-                  className='block text-left text-xl md:text-4xl lg:text-5xl xl:text-6xl font-bold hover:text-red-500 text-white cursor-pointer uppercase'
-                >
-                  {item.name}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* List */}
+          <div className='mt-16 space-y-6 md:space-y-10'>
+            {data.map((item) => (
+              <button
+                key={item.id}
+                onMouseEnter={() => setHovered(item)}
+                onMouseLeave={() => setHovered(null)}
+                className='block text-left text-xl md:text-4xl lg:text-5xl xl:text-6xl font-bold hover:text-red-500 text-white cursor-pointer uppercase'
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </>
