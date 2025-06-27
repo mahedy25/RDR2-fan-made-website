@@ -50,8 +50,13 @@ export default function Hero() {
     // Text fades in + background fades out
     tl.fromTo(
       textRef.current,
-      { opacity: 0, scale: 0.5 },
-      { opacity: 1, scale: 1, duration: 30, ease: 'power2.out' },
+      { opacity: 0, scale: 0.95, transformOrigin: 'center center' },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 30, // shorter to reduce visible distortion
+        ease: 'power2.out',
+      },
       '<'
     )
 
@@ -68,7 +73,6 @@ export default function Hero() {
       className='relative w-full h-[300vh] overflow-hidden'
     >
       <div className='sticky top-0 w-full h-screen'>
-
         {/* Background Image */}
         <div ref={bgRef} className='absolute inset-0 z-0'>
           <Image
@@ -93,9 +97,9 @@ export default function Hero() {
         {/* Text Content */}
         <div
           ref={textRef}
-          className='absolute inset-0 z-20 flex items-center justify-center h-full pointer-events-none '
+          className='absolute inset-0 z-20 flex items-center justify-center h-full pointer-events-none will-change-transform transform-gpu'
         >
-          <div className='w-[85%] max-w-4xl text-center text-white px-4 border-8 p-8'>
+          <div className='w-[85%] max-w-4xl text-center text-white px-4 border-8 border-white p-8' >
             <h1
               className={`${cinzel.className} text-4xl md:text-7xl font-extrabold tracking-wide leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]`}
             >
@@ -108,10 +112,20 @@ export default function Hero() {
               <span className='text-red-500 font-bold text-2xl md:text-3xl block mb-2'>
                 Red Dead Redemption 2-
               </span>
-              is a critically acclaimed open-world action-adventure game developed by Rockstar Games. Set in 1899, at the end of the American Wild West era, the game follows{' '}
-              <span className='text-white font-semibold'>Arthur Morgan</span>, a rugged outlaw and loyal member of the Van der Linde gang, as he navigates a rapidly changing world where lawmen, industrialization, and internal conflicts threaten his way of life.
-              <br /><br />
-              From snowy peaks to swampy bayous, RDR2 offers a deeply immersive experience, filled with heart-pounding heists, rich storytelling, and unforgettable moments. It’s not just a game — it’s a living, breathing world.
+              is a critically acclaimed open-world action-adventure game
+              developed by Rockstar Games. Set in 1899, at the end of the
+              American Wild West era, the game follows{' '}
+              <span className='text-white font-semibold'>Arthur Morgan</span>, a
+              rugged outlaw and loyal member of the Van der Linde gang, as he
+              navigates a rapidly changing world where lawmen,
+              industrialization, and internal conflicts threaten his way of
+              life.
+              <br />
+              <br />
+              From snowy peaks to swampy bayous, RDR2 offers a deeply immersive
+              experience, filled with heart-pounding heists, rich storytelling,
+              and unforgettable moments. It’s not just a game — it’s a living,
+              breathing world.
             </p>
           </div>
         </div>
